@@ -1,0 +1,92 @@
+
+CREATE DATABASE IF NOT EXISTS LibraryDB;
+USE LibraryDB;
+
+DROP TABLE IF EXISTS Borrower;
+DROP TABLE IF EXISTS Fine;
+
+
+CREATE TABLE Borrower (
+    Rollin INT PRIMARY KEY,
+    Name VARCHAR(50),
+    DateofIssue DATE,
+    NameofBook VARCHAR(50),
+    Status CHAR(1)
+);
+
+CREATE TABLE Fine (
+    Roll_no INT,
+    Date_returned DATE,
+    Amt INT
+);
+
+
+INSERT INTO Borrower VALUES 
+(1, 'Tejas', '2025-10-10', 'DBMS Concepts', 'I'),
+(2, 'Riya', '2025-09-15', 'Networking', 'I'),
+(3, 'Ankita', '2025-10-25', 'Operating Systems', 'I');
+
+
+DELIMITER $$
+
+CREATE PROCEDURE Return_Book(
+    IN p_rollno INT,
+    IN p_bookname VARCHAR(50)
+)
+BEGIN
+    DECLARE v_issue_date DATE;
+    DECLARE v_days INT DEFAULT 0;
+    DECLARE v_fine INT DEFAULT 0;
+    DECLARE v_status CHAR(1);
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        SELECT '⚠️ Error: Invalid data or record not found!' AS Message;
+    END;
+
+   
+    SELECT DateofIssue, Status INTO v_issue_date, v_status
+    FROM Borrower
+    WHERE Rollin = p_rollno AND NameofBook = p_bookname;
+
+   
+    SET v_days = DATEDIFF(CURDATE(), v_issue_date);
+
+   
+    IF v_status = 'R' THEN
+        SELECT '📘 Book already returned!' AS Message;
+    ELSE
+        -- Fine Calculation Logic
+        IF v_days > 30 THEN
+            SET v_fine = v_days * 50;
+        ELSEIF v_days BETWEEN 15 AND 30 THEN
+            SET v_fine = v_days * 5;
+        ELSE
+            SET v_fine = 0;
+        END IF;
+
+      
+        UPDATE Borrower 
+        SET Status = 'R'
+        WHERE Rollin = p_rollno AND NameofBook = p_bookname;
+
+       
+        IF v_fine > 0 THEN
+            INSERT INTO Fine VALUES (p_rollno, CURDATE(), v_fine);
+        END IF;
+
+      
+        SELECT 
+            CONCAT('✅ Book returned successfully!') AS Message,
+            CONCAT('📅 Total Days: ', v_days) AS Days,
+            CONCAT('💰 Fine Amount: ₹', v_fine) AS Fine;
+    END IF;
+END $$
+
+DELIMITER ;
+
+CALL Return_Book(1, 'DBMS Concepts');
+CALL Return_Book(2, 'Networking');
+CALL Return_Book(3, 'Operating Systems');
+
+SELECT * FROM Borrower;
+SELECT * FROM Fine;

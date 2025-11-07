@@ -1,0 +1,27 @@
+use CollegeDB
+
+db.Student.insertMany([
+  { _id: 1, name: "Riya", dept: "CSE", marks: 450 },
+  { _id: 2, name: "Arjun", dept: "CSE", marks: 420 },
+  { _id: 3, name: "Meena", dept: "ECE", marks: 400 },
+  { _id: 4, name: "Karan", dept: "ECE", marks: 460 },
+  { _id: 5, name: "Asha", dept: "MECH", marks: 380 }
+])
+
+print("All Student Records:")
+db.Student.find().forEach(printjson)
+
+print("\nDepartment-wise Total and Average Marks:")
+db.Student.aggregate([
+  { $group: { _id: "$dept", total_marks: { $sum: "$marks" }, avg_marks: { $avg: "$marks" } } },
+  { $sort: { avg_marks: -1 } }
+]).forEach(printjson)
+
+print("\nCreating Index on 'dept' field:")
+db.Student.createIndex({ dept: 1 })
+
+print("\nExisting Indexes in Student Collection:")
+db.Student.getIndexes().forEach(printjson)
+
+print("\nSearching Students in 'CSE' Department:")
+db.Student.find({ dept: "CSE" }).forEach(printjson)

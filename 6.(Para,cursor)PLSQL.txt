@@ -1,0 +1,70 @@
+CREATE DATABASE IF NOT EXISTS Implicit;
+USE Implicit;
+
+
+
+
+DROP TABLE IF EXISTS O_RollCall;
+DROP TABLE IF EXISTS N_RollCall;
+
+
+CREATE TABLE O_RollCall(
+    roll_no INT PRIMARY KEY,
+    name VARCHAR(20),
+    marks INT
+);
+
+INSERT INTO O_RollCall VALUES (1, 'abc', 45);
+INSERT INTO O_RollCall VALUES (2, 'pqr', 55);
+INSERT INTO O_RollCall VALUES (4, 'lmn', 65);
+INSERT INTO O_RollCall VALUES (5, 'def', 75);
+
+CREATE TABLE N_RollCall(
+    roll_no INT,
+    name VARCHAR(20),
+    marks INT
+);
+
+INSERT INTO N_RollCall VALUES (1, 'abc', 45);
+INSERT INTO N_RollCall VALUES (3, 'xyz', 45);
+INSERT INTO N_RollCall VALUES (7, 'xyzr', 95);
+INSERT INTO N_RollCall VALUES (8, 'pqrs', 65);
+DELIMITER $$
+
+CREATE PROCEDURE merge_rollcall()
+BEGIN
+    DECLARE done INT DEFAULT 0;
+    DECLARE r INT;
+    DECLARE n VARCHAR(20);
+    DECLARE m INT;
+
+  
+    DECLARE cur1 CURSOR FOR 
+        SELECT roll_no, name, marks FROM N_RollCall;
+
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
+
+    OPEN cur1;
+
+    read_loop: LOOP
+        FETCH cur1 INTO r, n, m;
+        IF done = 1 THEN
+            LEAVE read_loop;
+        END IF;
+
+        
+        IF NOT EXISTS (SELECT 1 FROM O_RollCall WHERE roll_no = r) THEN
+            INSERT INTO O_RollCall VALUES (r, n, m);
+        END IF;
+    END LOOP;
+
+    CLOSE cur1;
+END$$
+
+DELIMITER ;
+
+CALL merge_rollcall();
+
+SELECT * FROM O_RollCall;
+SELECT * FROM N_RollCall;
+

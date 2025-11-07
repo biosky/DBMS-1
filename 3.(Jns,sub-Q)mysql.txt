@@ -1,0 +1,83 @@
+CREATE DATABASE CollegeDB;
+USE CollegeDB;
+
+CREATE TABLE Department (
+  dept_id INT PRIMARY KEY,
+  dept_name VARCHAR(50)
+);
+
+CREATE TABLE Student (
+  student_id INT PRIMARY KEY,
+  name VARCHAR(50),
+  age INT,
+  dept_id INT,
+  marks INT,
+  FOREIGN KEY (dept_id) REFERENCES Department(dept_id)
+);
+
+CREATE TABLE Teacher (
+  teacher_id INT PRIMARY KEY,
+  teacher_name VARCHAR(50),
+  dept_id INT,
+  FOREIGN KEY (dept_id) REFERENCES Department(dept_id)
+);
+
+INSERT INTO Department VALUES 
+(1, 'Computer'),
+(2, 'Mechanical'),
+(3, 'Civil');
+
+INSERT INTO Student VALUES
+(101, 'Ankita', 20, 1, 85),
+(102, 'Rohan', 21, 2, 75),
+(103, 'Priya', 22, 1, 90),
+(104, 'Madhav', 23, 3, 60),
+(105, 'Neha', 21, 2, 88);
+
+INSERT INTO Teacher VALUES
+(201, 'Mr. Sharma', 1),
+(202, 'Mrs. Patel', 2),
+(203, 'Mr. Deshmukh', 3);
+
+SELECT Student.name, Department.dept_name
+FROM Student
+INNER JOIN Department ON Student.dept_id = Department.dept_id;
+
+SELECT Student.name, Department.dept_name
+FROM Student
+LEFT JOIN Department ON Student.dept_id = Department.dept_id;
+
+SELECT Student.name, Department.dept_name
+FROM Student
+RIGHT JOIN Department ON Student.dept_id = Department.dept_id;
+
+SELECT Student.name, Department.dept_name
+FROM Student
+LEFT JOIN Department ON Student.dept_id = Department.dept_id
+UNION
+SELECT Student.name, Department.dept_name
+FROM Student
+RIGHT JOIN Department ON Student.dept_id = Department.dept_id;
+
+SELECT Student.name, Teacher.teacher_name
+FROM Student
+CROSS JOIN Teacher;
+
+SELECT name, marks 
+FROM Student 
+WHERE marks > (SELECT AVG(marks) FROM Student);
+
+SELECT name 
+FROM Student 
+WHERE dept_id IN (SELECT dept_id FROM Department WHERE dept_name='Computer');
+
+CREATE VIEW HighScorers AS
+SELECT name, marks FROM Student WHERE marks > 80;
+
+SELECT * FROM HighScorers;
+
+UPDATE Student 
+SET marks = marks + 5 
+WHERE dept_id = (SELECT dept_id FROM Department WHERE dept_name='Computer');
+
+SELECT * FROM Student;

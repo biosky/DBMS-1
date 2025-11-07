@@ -1,0 +1,28 @@
+use CollegeDB
+
+db.Sales.drop()
+db.Sales.insertMany([
+  { _id: 1, product: "Pen", qty: 5, price: 10 },
+  { _id: 2, product: "Pencil", qty: 10, price: 5 },
+  { _id: 3, product: "Book", qty: 3, price: 50 },
+  { _id: 4, product: "Pen", qty: 8, price: 10 },
+  { _id: 5, product: "Pencil", qty: 15, price: 5 },
+  { _id: 6, product: "Book", qty: 2, price: 50 }
+])
+
+var mapFunction = function() {
+  emit(this.product, this.qty * this.price)
+}
+
+var reduceFunction = function(key, values) {
+  return Array.sum(values)
+}
+
+db.Sales.mapReduce(
+  mapFunction,
+  reduceFunction,
+  { out: "TotalSales" }
+)
+
+print("Total Sales (Product-wise):")
+db.TotalSales.find().forEach(printjson)

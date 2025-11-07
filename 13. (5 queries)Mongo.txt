@@ -1,0 +1,17 @@
+use collegeDB
+
+db.createCollection("student")
+
+db.student.insertMany([
+  { roll_no: 1, name: "Anita", course: "CS", marks: 85 },
+  { roll_no: 2, name: "Rahul", course: "IT", marks: 78 },
+  { roll_no: 3, name: "Neha", course: "CS", marks: 90 },
+  { roll_no: 4, name: "Amit", course: "ENTC", marks: 65 },
+  { roll_no: 5, name: "Priya", course: "IT", marks: 88 }
+])
+
+db.student.find()
+db.student.find({ marks: { $gt: 80 } })
+db.student.find({ course: "IT" })
+db.student.updateOne({ roll_no: 4 }, { $set: { marks: 70 } })
+db.student.deleteOne({ roll_no: 5 })
