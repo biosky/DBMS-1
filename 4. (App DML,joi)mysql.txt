@@ -1,0 +1,89 @@
+CREATE DATABASE CollegeDB;
+USE CollegeDB;
+
+CREATE TABLE Department (
+  dept_id INT PRIMARY KEY,
+  dept_name VARCHAR(50)
+);
+
+CREATE TABLE Student (
+  student_id INT PRIMARY KEY,
+  name VARCHAR(50),
+  age INT,
+  dept_id INT,
+  marks INT,
+  FOREIGN KEY (dept_id) REFERENCES Department(dept_id)
+);
+
+CREATE TABLE Teacher (
+  teacher_id INT PRIMARY KEY,
+  teacher_name VARCHAR(50),
+  dept_id INT,
+  FOREIGN KEY (dept_id) REFERENCES Department(dept_id)
+);
+
+INSERT INTO Department VALUES
+(1, 'Computer Science'),
+(2, 'Electronics'),
+(3, 'Mechanical');
+
+INSERT INTO Student VALUES
+(101, 'Anku', 20, 1, 85),
+(102, 'Ravi', 21, 1, 78),
+(103, 'Meera', 22, 2, 90),
+(104, 'Rohit', 21, 3, 67),
+(105, 'Sneha', 20, 2, 75);
+
+INSERT INTO Teacher VALUES
+(201, 'Madhav', 1),
+(202, 'Priya', 2),
+(203, 'Vikas', 3);
+
+SELECT Student.name, Student.marks, Department.dept_name
+FROM Student
+INNER JOIN Department ON Student.dept_id = Department.dept_id;
+
+SELECT Student.name, Department.dept_name
+FROM Student
+LEFT JOIN Department ON Student.dept_id = Department.dept_id;
+
+SELECT Teacher.teacher_name, Department.dept_name
+FROM Teacher
+RIGHT JOIN Department ON Teacher.dept_id = Department.dept_id;
+
+SELECT Student.name, Department.dept_name
+FROM Student
+LEFT JOIN Department ON Student.dept_id = Department.dept_id
+UNION
+SELECT Student.name, Department.dept_name
+FROM Student
+RIGHT JOIN Department ON Student.dept_id = Department.dept_id;
+
+SELECT Student.name AS Student, Teacher.teacher_name AS Teacher
+FROM Student
+CROSS JOIN Teacher;
+
+SELECT name, marks
+FROM Student
+WHERE marks > (SELECT AVG(marks) FROM Student);
+
+SELECT dept_name
+FROM Department
+WHERE dept_id = (
+    SELECT dept_id
+    FROM Student
+    WHERE marks = (SELECT MAX(marks) FROM Student)
+);
+
+CREATE VIEW StudentDepartmentView AS
+SELECT Student.name, Student.marks, Department.dept_name
+FROM Student
+JOIN Department ON Student.dept_id = Department.dept_id;
+
+SELECT * FROM StudentDepartmentView;
+
+UPDATE Student
+SET marks = marks + 5
+WHERE dept_id = 1;
+
+SELECT * FROM Student;
